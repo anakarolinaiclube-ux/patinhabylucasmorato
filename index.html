@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patinha - Guia de Adestramento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #f05a24;
+            --primary-green: #3ab475;
+            --bg-color: #f5f1ea;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --text-dark: #2d2d2d;
+            --text-light: #666;
+            --radius: 28px;
+            --glass: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            position: relative;
+            padding-bottom: 100px;
+        }
+
+        /* --- UI COMPONENTS --- */
+
+        .header {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            color: var(--primary-orange);
+        }
+
+        .logo span { color: var(--primary-green); }
+
+        .btn-back {
+            background: var(--glass);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        h1 { font-weight: 800; font-size: 28px; margin-bottom: 20px; }
+
+        /* --- HOME SCREEN: TREINOS --- */
+
+        .training-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .training-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .training-card:active { transform: scale(0.98); }
+
+        .card-top { display: flex; align-items: center; gap: 15px; }
+
+        .card-icon {
+            font-size: 32px;
+            background: #fff5f0;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+        }
+
+        .card-info h3 { font-size: 18px; font-weight: 700; }
+        .card-info p { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+
+        .progress-container {
+            width: 100%;
+            background: #eee;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-orange);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* --- DETALHE DO TREINO --- */
+
+        .detail-view { display: none; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        section {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        section h4 { margin-bottom: 15px; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: var(--primary-orange); }
+
+        .steps-list { list-style: none; }
+        .steps-list li { margin-bottom: 12px; font-size: 15px; line-height: 1.4; display: flex; gap: 10px; }
+        .steps-list li::before { content: '•'; color: var(--primary-orange); font-weight: bold; }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--primary-green);
+        }
+
+        .btn-finish {
+            width: 100%;
+            padding: 20px;
+            border-radius: var(--radius);
+            border: none;
+            background: var(--primary-orange);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(240, 90, 36, 0.3);
+            transition: background 0.3s;
+        }
+
+        .btn-finish:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-card { background: white; padding: 15px; border-radius: 20px; text-align: center; }
+        .stat-value { display: block; font-size: 22px; font-weight: 800; color: var(--primary-green); }
+        .stat-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 410px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            height: 70px;
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .nav-item { text-align: center; color: #a0a0a0; font-size: 10px; font-weight: 600; text-decoration: none; }
+        .nav-item.active { color: var(--primary-orange); }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="header">
+        <div class="logo">patinha<span>.</span></div>
+    </div>
+
+    <!-- HOME VIEW -->
+    <div id="home-view">
+        <h1>Guia de <br>Adestramento</h1>
+        <div class="training-list" id="training-list">
+            <!-- JS vai popular aqui -->
+        </div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="detail-view" class="detail-view">
+        <button class="btn-back" onclick="showHome()">← Voltar</button>
+        <h1 id="detail-title">Treino</h1>
+
+        <section>
+            <h4>Como funciona</h4>
+            <ul class="steps-list" id="detail-steps"></ul>
+        </section>
+
+        <section>
+            <h4>Checklist do treino</h4>
+            <div id="checklist">
+                <label class="checklist-item">
+                    <input type="checkbox" class="check-step"> Preparei o ambiente calmo
+                </label>
+                <label class="checklist-item">
+                    <input type="checkbox" class="check-step"> Tenho recompensas (petiscos)
+                </label>
+                <label class="checklist-item">
+                    <input type="checkbox" class="check-step"> Meu pet está atento a mim
+                </label>
+            </div>
+        </section>
+
+        <button class="btn-finish" id="btn-finish" onclick="completeDailyTraining()">Concluir treino de hoje</button>
+
+        <div id="feedback-msg" style="text-align: center; margin: 20px 0; font-weight: 600; color: var(--primary-green); display: none;">
+            ✨ Seu pet está evoluindo! Continue assim!
+        </div>
+
+        <section style="margin-top: 25px;">
+            <h4>Seu progresso</h4>
+            <div class="progress-container" style="margin-bottom: 15px;">
+                <div class="progress-bar" id="detail-progress-bar"></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-progress">0%</span>
+                    <span class="stat-label">Concluído</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-streak">0</span>
+                    <span class="stat-label">Dias seguidos</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- NAVBAR SIMULADA -->
+    <nav class="navbar">
+        <a href="#" class="nav-item active"><span class="nav-icon">🏠</span>Início</a>
+        <a href="#" class="nav-item"><span class="nav-icon">💰</span>Finanças</a>
+        <a href="#" class="nav-item"><span class="nav-icon">🐾</span>Perfil</a>
+    </nav>
+</div>
+
+<script>
+    // --- DATABASE DE TREINOS ---
+    const trainings = [
+        {
+            id: 'sentar',
+            name: 'Ensinar a sentar',
+            desc: 'O comando básico mais importante.',
+            icon: '🪑',
+            steps: [
+                'Segure um petisco perto do nariz do pet.',
+                'Mova a mão para cima, fazendo a cabeça seguir o petisco.',
+                'Isso fará o bumbum baixar naturalmente.',
+                'Assim que sentar, diga "Senta" e dê a recompensa.',
+                'Repita 5 vezes por sessão.'
+            ]
+        },
+        {
+            id: 'xixi',
+            name: 'Xixi no lugar certo',
+            desc: 'Mantenha sua casa limpa e o pet educado.',
+            icon: '🚽',
+            steps: [
+                'Leve-o ao tapetinho logo após acordar ou comer.',
+                'Use uma palavra de comando como "Banheiro".',
+                'Ignore os erros; limpe com neutralizador de odor.',
+                'Recompense IMEDIATAMENTE após ele acertar o local.'
+            ]
+        },
+        {
+            id: 'guia',
+            name: 'Parar de puxar a guia',
+            desc: 'Passeios mais calmos e prazerosos.',
+            icon: '🐕',
+            steps: [
+                'Comece a andar. Se ele puxar, pare imediatamente.',
+                'Não puxe de volta, apenas fique parado como uma estátua.',
+                'Quando a guia afrouxar e ele olhar para você, recompense.',
+                'Ande novamente. Repita o processo com paciência.'
+            ]
+        },
+        {
+            id: 'latidos',
+            name: 'Reduzir latidos',
+            desc: 'Controle a ansiedade e barulhos excessivos.',
+            icon: '📢',
+            steps: [
+                'Identifique o gatilho (campainha, pessoas, etc).',
+                'Desvie a atenção dele antes do latido começar.',
+                'Use o comando "Silêncio" em tom calmo.',
+                'Recompense o silêncio com algo de alto valor.'
+            ]
+        }
+    ];
+
+    // --- ESTADO DO APP ---
+    let userProgress = JSON.parse(localStorage.getItem('patinha_progress')) || {};
+    let currentTrainingId = null;
+
+    // --- FUNÇÕES DE NAVEGAÇÃO ---
+    function init() {
+        renderTrainingList();
+    }
+
+    function renderTrainingList() {
+        const listContainer = document.getElementById('training-list');
+        listContainer.innerHTML = '';
+
+        trainings.forEach(t => {
+            const data = userProgress[t.id] || { progress: 0 };
+            const card = document.createElement('div');
+            card.className = 'training-card';
+            card.onclick = () => showDetail(t.id);
+            card.innerHTML = `
+                <div class="card-top">
+                    <div class="card-icon">${t.icon}</div>
+                    <div class="card-info">
+                        <h3>${t.name}</h3>
+                        <p>${t.desc}</p>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${data.progress}%"></div>
+                </div>
+                <div style="font-size: 11px; font-weight: 600; color: var(--primary-orange)">${data.progress}% CONCLUÍDO</div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    function showDetail(id) {
+        currentTrainingId = id;
+        const training = trainings.find(t => t.id === id);
+        const data = userProgress[id] || { progress: 0, streak: 0, lastDate: null };
+
+        document.getElementById('home-view').style.display = 'none';
+        document.getElementById('detail-view').style.display = 'block';
+        document.querySelector('.btn-back').style.display = 'block';
+
+        document.getElementById('detail-title').innerText = training.name;
+        
+        // Renderizar passos
+        const stepsContainer = document.getElementById('detail-steps');
+        stepsContainer.innerHTML = training.steps.map(s => `<li>${s}</li>`).join('');
+
+        // Reset checklist
+        document.querySelectorAll('.check-step').forEach(c => c.checked = false);
+        document.getElementById('btn-finish').disabled = true;
+        document.getElementById('feedback-msg').style.display = 'none';
+
+        updateStatsUI(data);
+    }
+
+    function showHome() {
+        document.getElementById('home-view').style.display = 'block';
+        document.getElementById('detail-view').style.display = 'none';
+        document.querySelector('.btn-back').style.display = 'none';
+        renderTrainingList();
+    }
+
+    // --- LOGICA DE TREINO ---
+
+    // Habilitar botão apenas se checklist estiver ok
+    document.addEventListener('change', (e) => {
+        if(e.target.classList.contains('check-step')) {
+            const allChecked = Array.from(document.querySelectorAll('.check-step')).every(c => c.checked);
+            document.getElementById('btn-finish').disabled = !allChecked;
+        }
+    });
+
+    function completeDailyTraining() {
+        const today = new Date().toDateString();
+        let data = userProgress[currentTrainingId] || { progress: 0, streak: 0, lastDate: null };
+
+        if (data.lastDate === today) {
+            alert("Você já treinou isso hoje! Volte amanhã para continuar evoluindo.");
+            return;
+        }
+
+        // Lógica de progresso e streak
+        data.progress = Math.min(data.progress + 10, 100);
+        
+        if (data.lastDate === new Date(Date.now() - 86400000).toDateString()) {
+            data.streak += 1;
+        } else {
+            data.streak = 1;
+        }
+        
+        data.lastDate = today;
+        userProgress[currentTrainingId] = data;
+        localStorage.setItem('patinha_progress', JSON.stringify(userProgress));
+
+        // Feedback Visual
+        updateStatsUI(data);
+        document.getElementById('feedback-msg').style.display = 'block';
+        document.getElementById('btn-finish').disabled = true;
+
+        // Animação de confete simples (feedback emocional)
+        document.getElementById('btn-finish').innerText = "✅ Treino Concluído!";
+        setTimeout(() => {
+            showHome();
+        }, 2000);
+    }
+
+    function updateStatsUI(data) {
+        document.getElementById('detail-progress-bar').style.width = data.progress + '%';
+        document.getElementById('stat-progress').innerText = data.progress + '%';
+        document.getElementById('stat-streak').innerText = data.streak;
+    }
+
+    // Iniciar
+    init();
+
+</script>
+
+</body>
+</html>
